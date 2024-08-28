@@ -5,6 +5,7 @@
 
 # Compare the content of histograms produced by analysis with a reference file.
 # A reference file for N_FILES_MAX_PER_SAMPLE=1 is available in directory `reference/`.
+# A reference file can be created by providing a histogram using '--histos' and '--dump json'.
 
 from __future__ import annotations
 import argparse
@@ -20,6 +21,7 @@ def parse_args() -> argparse.Namespace:
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--reference", help="JSON reference against which histogram contents should be compared")
     group.add_argument("--dump-json", help="Print JSON representation of histogram contents to screen", action='store_true')
+    parser.add_argument("--output-file", help="Output file to save JSON representation of histogram contents")
     parser.add_argument("--verbose", help="Print extra information about bin mismatches", action='store_true')
     return parser.parse_args()
 
@@ -103,7 +105,13 @@ if __name__ == "__main__":
         histos = as_dict(f)
 
     if args.dump_json:
-        print(json.dumps(histos, indent=2, sort_keys=True))
+        json_data = json.dumps(histos, indent=2, sort_keys=True)
+        if args.output_file:
+            with open(args.output_file, 'w') as outfile:
+                outfile.write(json_data)
+            print(f"JSON data saved to {args.output_file}")
+        else:
+            print(json_data)
         sys.exit(0)
 
     with open(args.reference) as reference:
